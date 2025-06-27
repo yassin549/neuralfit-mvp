@@ -1,0 +1,52 @@
+# Dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# Next.js build outputs
+/.next/
+/out/
+
+# Python virtual environments and caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv
+pip-wheel-metadata/
+*.egg-info/
+
+# AI Models & Large Files (IMPORTANT)
+# This prevents you from uploading gigabytes of model data
+*.bin
+*.pth
+*.safetensors
+
+# Build artifacts
+/dist
+/build
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.yarn/integrity
+
+# IDE & OS specific files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+
+# Environment variables
+.env
+.env.*
+!.env.example

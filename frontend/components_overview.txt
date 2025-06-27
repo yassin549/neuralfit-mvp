@@ -1,0 +1,81 @@
+NeuralFit Frontend Component Inventory (initial scan)
+======================================================
+
+Core Layout / Providers
+-----------------------
+Layout.tsx                - Global root layout wrapper
+app-layout.tsx            - App-specific layout wrapper
+site-header.tsx           - Top navigation/header
+site-footer.tsx           - Footer section
+bottom-nav.tsx            - Original bottom navigation bar
+bottom-nav-new.tsx        - Updated dock-style nav bar
+window-system.tsx         - Manages floating window UX
+window-controls.tsx       - Control bar (min/max/close) inside each window
+
+Global Providers / Utilities
+----------------------------
+auth-provider.tsx         - Next-Auth session provider
+toast-provider.tsx        - Global toast notifications
+theme-provider.tsx        - Dark / light theme support
+Theme-toggle.tsx          - Toggle switch component
+
+Auth Screens / Widgets
+----------------------
+auth/auth-form.tsx        - Shared login / register form component
+
+Dashboard & Pages
+-----------------
+dashboard/user-dashboard.tsx  - Main dashboard content
+Dashboard/space-history.tsx   - Recent activity list
+
+Window Content Components
+-------------------------
+window-content/chatting-content.tsx
+window-content/chat-content.tsx
+window-content/dashboard-content.tsx
+window-content/home-content.tsx
+window-content/settings-content.tsx
+window-content/social-space-content.tsx
+window-content/stats-content.tsx
+window-content/therapist-window.tsx
+window-content/therapy-content.tsx
+window-content/video-call-content.tsx
+window-content/voice-call-content.tsx
+
+Features / Functionality Components
+-----------------------------------
+ai-chat/ai-chat.tsx       - Full chat UI connecting to backend
+chat/ChatInterface.tsx    - Legacy chat interface
+therapist/dashboard.tsx   - Therapist specific dashboard view
+
+Reusable UI Primitives (Tailwind-styled)
+---------------------------------------
+ui/avatar.tsx
+ui/button.tsx
+ui/card.tsx
+ui/container.tsx
+ui/dropdown-menu.tsx
+ui/form.tsx
+ui/icon.tsx
+ui/input.tsx
+ui/ios-card.tsx
+ui/label.tsx
+ui/skeleton.tsx
+ui/sonner.tsx
+ui/spinner.tsx
+ui/textarea.tsx
+ui/toast.tsx
+ui/toaster.tsx
+ui/tooltip.tsx
+
+Icons / Misc
+-------------
+icons.tsx                 - Centralised Lucide icon exports
+test-icons.tsx            - Playground/demos for icons
+chat/icons/SendIcon.tsx   - Custom send icon
+
+Next Steps
+==========
+1. Review each page in mobile viewport and list issues.
+2. Prioritise critical components (header, bottom nav, window-system, ai-chat).
+3. Apply Tailwind responsive classes and conditional logic.
