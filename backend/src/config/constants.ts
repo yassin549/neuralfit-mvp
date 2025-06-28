@@ -1,9 +1,9 @@
 // Environment configuration
 export const env = {
   // Server
-  NODE_ENV: process.env.NODE_ENV || 'development',
+  NODE_ENV: process.env.NODE_ENV || 'production',
   PORT: process.env.PORT || '3001',
-  FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:3000',
+  FRONTEND_URL: process.env.FRONTEND_URL || 'https://neuralfit-gdpj1fcn.livekit.cloud',
   
   // JWT
   JWT_SECRET: process.env.JWT_SECRET || 'your-secret-key-needs-to-be-very-strong-and-secure',
@@ -12,22 +12,30 @@ export const env = {
   JWT_REFRESH_COOKIE_NAME: process.env.JWT_REFRESH_COOKIE_NAME || 'refreshToken',
   
   // Database
-  DATABASE_URL: process.env.DATABASE_URL || 'postgres://postgres:postgres@localhost:5432/neuralfit',
+  DATABASE_URL: process.env.DATABASE_URL || 'postgresql://postgres.ykvmmeundylyizhtmmwn:[Azerty03041973@]@aws-0-us-west-1.pooler.supabase.com:6543/postgres',
   
   // Cookies
-  COOKIE_SECURE: process.env.COOKIE_SECURE === 'true',
-  COOKIE_HTTP_ONLY: process.env.COOKIE_HTTP_ONLY !== 'false',
-  COOKIE_SAME_SITE: process.env.COOKIE_SAME_SITE as 'lax' | 'strict' | 'none' || 'strict',
+  COOKIE_SECURE: process.env.NODE_ENV === 'production',
+  COOKIE_HTTP_ONLY: true,
+  COOKIE_SAME_SITE: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
   
   // Rate limiting
   RATE_LIMIT_WINDOW_MS: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000', 10),
   RATE_LIMIT_MAX: parseInt(process.env.RATE_LIMIT_MAX || '100', 10),
   
   // AI Model Configuration
-  HUGGINGFACE_SPACE_URL: process.env.HUGGINGFACE_SPACE_URL || 'https://yassinkhoualdi-neuralfit.hf.space',
+  HUGGINGFACE_SPACE_URL: process.env.HUGGINGFACE_SPACE_URL,
   MODEL_PATH: process.env.MODEL_PATH || './models/MentaLLaMA-chat-7B',
   MODEL_REPO: process.env.MODEL_REPO || 'Felladrin/mentallama-chat-7b',
   AI_DEVICE: process.env.AI_DEVICE || 'cpu',
+  
+  // AI Parameters
+  AI_MAX_NEW_TOKENS: parseInt(process.env.AI_MAX_NEW_TOKENS || '2048', 10),
+  AI_TEMPERATURE: parseFloat(process.env.AI_TEMPERATURE || '0.7'),
+  AI_TOP_P: parseFloat(process.env.AI_TOP_P || '0.9'),
+  AI_REPETITION_PENALTY: parseFloat(process.env.AI_REPETITION_PENALTY || '1.1'),
+  AI_MAX_CONTEXT_LENGTH: parseInt(process.env.AI_MAX_CONTEXT_LENGTH || '4096', 10)
+} as const;
   AI_MAX_CONTEXT_LENGTH: parseInt(process.env.AI_MAX_CONTEXT_LENGTH || '4096', 10),
   AI_MAX_NEW_TOKENS: parseInt(process.env.AI_MAX_NEW_TOKENS || '200', 10),
   AI_TEMPERATURE: parseFloat(process.env.AI_TEMPERATURE || '0.7'),
