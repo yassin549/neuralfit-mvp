@@ -1,6 +1,7 @@
 
 import { conversationService, Message } from './services/conversation.service.js';
 import { MODEL_CONFIG } from './models/model.config.js';
+import { HuggingFaceClient } from './clients/huggingface.client.js';
 
 export interface GenerateResponseOptions {
   temperature?: number;
@@ -14,8 +15,11 @@ export class AIService {
   private static instance: AIService;
   private isInitialized = false;
   private initializationPromise: Promise<void> | null = null;
+  private huggingFaceClient: HuggingFaceClient;
 
-  private constructor() {}
+  private constructor() {
+    this.huggingFaceClient = HuggingFaceClient.getInstance();
+  }
 
   public static getInstance(): AIService {
     if (!AIService.instance) {
@@ -28,9 +32,14 @@ export class AIService {
     if (this.isInitialized) {
       return;
     }
-    // With the Python server, initialization is simpler.
-    // We can add a health check to the Python server here in the future.
     console.log('🚀 Initializing AI services...');
+    
+    // Check if Hugging Face Space is healthy
+    const isHealthy = await this.huggingFaceClient.healthCheck();
+    if (!isHealthy) {
+      throw new Error('Hugging Face Space is not healthy');
+    }
+
     this.isInitialized = true;
     console.log('✅ AI services initialized successfully.');
     return Promise.resolve();

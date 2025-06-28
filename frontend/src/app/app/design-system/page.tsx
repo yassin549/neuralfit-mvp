@@ -5,6 +5,8 @@ import { IOSCard, IOSCardHeader, IOSCardTitle, IOSCardDescription, IOSCardConten
 import { cn } from '@/lib/utils';
 import { ArrowRight, Check, Plus, Settings, Heart, MessageSquare, Share2, Bookmark, Bell, BellOff } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 export default function DesignSystemPage() {
   return (
     <div className="container mx-auto py-8 px-4 max-w-6xl">

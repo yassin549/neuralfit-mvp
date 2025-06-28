@@ -3,6 +3,8 @@ import { ArrowRight, Box, Code, Component, LayoutDashboard, Palette, Type } from
 import { IOSCard, IOSCardContent } from '@/components/ui/ios-card';
 import { Button } from '@/components/ui/button';
 
+export const dynamic = 'force-dynamic';
+
 const components = [
   {
     title: 'Buttons',
