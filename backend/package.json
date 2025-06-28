@@ -8,6 +8,7 @@
     "clean": "rimraf dist",
     "build": "npm run clean && npx tsc",
     "start": "node dist/src/index.js",
+    "start:prod": "NODE_ENV=production node dist/src/index.js",
     "dev": "cross-env PORT=3001 tsx watch --clear-screen=false --env-file=.env src/index.ts",
     "typeorm": "node -r dotenv/config --loader ts-node/esm ./node_modules/typeorm/cli.js --dataSource ./src/config/database.ts",
     "migration:generate": "npm run typeorm -- migration:generate src/migrations/InitialMigration -d ./src/config/database.ts",
