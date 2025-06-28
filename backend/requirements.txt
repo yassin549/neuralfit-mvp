@@ -13,4 +13,6 @@ gunicorn==21.2.0
 torch
 torchvision
 torchaudio
+fastapi
+uvicorn[standard]
 
