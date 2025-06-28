@@ -15,4 +15,7 @@ torchvision
 torchaudio
 fastapi
 uvicorn[standard]
+transformers
+accelerate
+sentencepiece
 
