@@ -24,6 +24,7 @@ export const env = {
   RATE_LIMIT_MAX: parseInt(process.env.RATE_LIMIT_MAX || '100', 10),
   
   // AI Model Configuration
+  HUGGINGFACE_SPACE_URL: process.env.HUGGINGFACE_SPACE_URL || 'https://yassinkhoualdi-neuralfit.hf.space',
   MODEL_PATH: process.env.MODEL_PATH || './models/MentaLLaMA-chat-7B',
   MODEL_REPO: process.env.MODEL_REPO || 'Felladrin/mentallama-chat-7b',
   AI_DEVICE: process.env.AI_DEVICE || 'cpu',

@@ -3,6 +3,7 @@ import { ModelConfig } from '../types/model.types.js';
 
 export const MODEL_CONFIG: ModelConfig = {
   modelName: 'MentaLLaMA-chat-7B',
+  modelPath: '',
   modelUrl: env.HUGGINGFACE_SPACE_URL || 'https://yassinkhoualdi-neuralfit.hf.space',
   maxNewTokens: env.AI_MAX_NEW_TOKENS,
   temperature: env.AI_TEMPERATURE,
@@ -18,4 +19,6 @@ export const MODEL_CONFIG: ModelConfig = {
   non-judgmental, and evidence-based responses to help users with their mental well-being. Be empathetic, 
   validate their feelings, and provide practical guidance when appropriate. Always maintain professional 
   boundaries and know when to recommend seeking help from a licensed professional.`,
+  device: 'cpu' as const,
+  quantized: false as const
 } as const;

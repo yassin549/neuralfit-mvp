@@ -7,6 +7,7 @@ import { AppDataSource } from './config/database.js';
 import authRoutes from './routes/auth.routes.js';
 import userRoutes from './routes/user.routes.js';
 import chatRoutes from './routes/chat.routes.js';
+import { ApiError } from './utils/errorHandler.js';
 
 const main = async () => {
   try {
@@ -40,9 +41,21 @@ const main = async () => {
     });
 
     // Global Error Handler
-    app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-      console.error(err.stack);
-      res.status(500).send('Something broke!');
+    app.use((err: Error | ApiError, req: Request, res: Response, next: NextFunction) => {
+      if (err instanceof Error) {
+        console.error(err.stack);
+      }
+      
+      if (err instanceof ApiError) {
+        return res.status(err.status).json(err.getResponse());
+      }
+      
+      // Default error response
+      return res.status(500).json({
+        message: 'Internal Server Error',
+        details: process.env.NODE_ENV === 'development' ? err.message : undefined,
+        timestamp: new Date().toISOString()
+      });
     });
 
     const PORT = process.env.PORT || 3001;

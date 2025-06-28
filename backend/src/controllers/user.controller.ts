@@ -1,12 +1,18 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { AppDataSource } from '../config/database.js';
-import { User } from '../entities/User.js';
+import { User, SafeUserData } from '../entities/User.js';
 import { AuthenticatedRequest } from '../middleware/auth.middleware.js';
+import { ApiError } from '../utils/errorHandler.js';
+import { HttpStatus } from '../utils/httpStatus.js';
 
 const userRepository = AppDataSource.getRepository(User);
 
 // Get all users (admin only)
-export const getAllUsers = async (req: Request, res: Response): Promise<void> => {
+export const getAllUsers = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const users = await userRepository.find({
       select: ['id', 'email', 'fullName', 'role', 'createdAt'],
@@ -14,12 +20,16 @@ export const getAllUsers = async (req: Request, res: Response): Promise<void> =>
     res.json({ users });
   } catch (error) {
     console.error('Get all users error:', error);
-    res.status(500).json({ message: 'Server error' });
+    throw new ApiError('Failed to fetch users', HttpStatus.INTERNAL_SERVER_ERROR, error);
   }
 };
 
 // Get user by ID
-export const getUserById = async (req: Request, res: Response): Promise<void> => {
+export const getUserById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const user = await userRepository.findOne({
       where: { id: req.params.id },
@@ -27,105 +37,95 @@ export const getUserById = async (req: Request, res: Response): Promise<void> =>
     });
 
     if (!user) {
-      res.status(404).json({ message: 'User not found' });
-      return;
+      throw new ApiError('User not found', HttpStatus.NOT_FOUND);
     }
 
     res.json({ user });
   } catch (error) {
-    console.error('Get user by ID error:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Get user error:', error);
+    throw new ApiError('Failed to fetch user', HttpStatus.INTERNAL_SERVER_ERROR, error);
   }
 };
 
 // Update user profile
-export const updateUserProfile = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+export const updateUserProfile = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
-    const { fullName, username, bio, avatarUrl } = req.body;
-    const userId = req.user?.id;
+    const { fullName, email } = req.body;
+    const authReq = req as AuthenticatedRequest;
 
-    if (!userId) {
-      res.status(401).json({ message: 'Authentication required' });
-      return;
+    if (!fullName && !email) {
+      throw new ApiError('No fields to update', HttpStatus.BAD_REQUEST);
     }
 
-    const user = await userRepository.findOne({ where: { id: userId } });
+    const user = await userRepository.findOne({
+      where: { id: authReq.user?.id },
+      select: ['id', 'email', 'fullName'],
+    });
+
     if (!user) {
-      res.status(404).json({ message: 'User not found' });
-      return;
+      throw new ApiError('User not found', HttpStatus.NOT_FOUND);
     }
 
-    // Check for username uniqueness if it's being changed
-    if (username && username !== user.username) {
-      const existingUser = await userRepository.findOne({ where: { username } });
-      if (existingUser && existingUser.id !== userId) {
-        res.status(400).json({ message: 'Username is already taken' });
-        return;
-      }
-    }
-
-    // Update fields that are provided
-    user.fullName = fullName ?? user.fullName;
-    user.username = username ?? user.username;
-    user.bio = bio ?? user.bio;
-    user.avatarUrl = avatarUrl ?? user.avatarUrl;
+    if (email) user.email = email;
+    if (fullName) user.fullName = fullName;
 
     await userRepository.save(user);
-
-    const { password, ...userData } = user;
-    res.json({ user: userData });
-  } catch (error: any) {
-    console.error('Update user profile error:', error);
-    // Handle potential unique constraint violation on email if it were updatable here
-    if (error.code === '23505') { // PostgreSQL unique violation
-      res.status(400).json({ message: 'A user with this username or email already exists.' });
-      return;
-    }
-    res.status(500).json({ message: 'Server error while updating profile' });
+    res.json({ message: 'Profile updated successfully', user: user.toSafeUser() });
+  } catch (error) {
+    console.error('Update profile error:', error);
+    throw new ApiError('Failed to update profile', HttpStatus.INTERNAL_SERVER_ERROR, error);
   }
 };
 
 // Get public user profile by username
-export const getPublicUserProfile = async (req: Request, res: Response): Promise<void> => {
+export const getPublicUserProfile = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const { username } = req.params;
     const user = await userRepository.findOne({
       where: { username },
-      select: ['id', 'username', 'fullName', 'bio', 'avatarUrl', 'createdAt'],
+      select: ['id', 'username', 'fullName', 'createdAt'],
     });
 
     if (!user) {
-      res.status(404).json({ message: 'User not found' });
-      return;
+      throw new ApiError('User not found', HttpStatus.NOT_FOUND);
     }
 
     res.json({ user });
   } catch (error) {
-    console.error('Get public user profile error:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Get public profile error:', error);
+    throw new ApiError('Failed to fetch profile', HttpStatus.INTERNAL_SERVER_ERROR, error);
   }
 };
 
 // Delete user
-export const deleteUser = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+export const deleteUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
-    const userId = req.user?.id;
+    const authReq = req as AuthenticatedRequest;
+    const user = await userRepository.findOne({
+      where: { id: authReq.user?.id },
+      select: ['id'],
+    });
 
-    const user = await userRepository.findOne({ where: { id: userId } });
     if (!user) {
-      res.status(404).json({ message: 'User not found' });
-      return;
+      throw new ApiError('User not found', HttpStatus.NOT_FOUND);
     }
 
     await userRepository.remove(user);
-
-    res.clearCookie('accessToken');
-    res.clearCookie('refreshToken', { path: '/api/auth/refresh-token' });
-
     res.json({ message: 'User deleted successfully' });
   } catch (error) {
     console.error('Delete user error:', error);
-    res.status(500).json({ message: 'Server error' });
+    throw new ApiError('Failed to delete user', HttpStatus.INTERNAL_SERVER_ERROR, error);
   }
 };
-

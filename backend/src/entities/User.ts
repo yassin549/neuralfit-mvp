@@ -11,6 +11,21 @@ import {
 import * as bcrypt from 'bcryptjs';
 import { RefreshToken } from './RefreshToken.js';
 
+// Type for user data without sensitive fields
+export interface SafeUserData {
+  id: string;
+  email: string;
+  fullName: string;
+  username?: string;
+  bio?: string;
+  avatarUrl?: string;
+  role: string;
+  isVerified: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  refreshTokens: RefreshToken[];
+}
+
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
@@ -48,7 +63,7 @@ export class User {
 
   @OneToMany(() => RefreshToken, (refreshToken: RefreshToken) => refreshToken.user, {
     cascade: true,
-    onDelete: 'CASCADE',
+    orphanedRowAction: 'delete'
   })
   refreshTokens!: RefreshToken[];
 
@@ -56,20 +71,32 @@ export class User {
   @BeforeUpdate()
   async hashPassword(): Promise<void> {
     if (this.password) {
-      const salt = await bcrypt.genSalt(10);
-      this.password = await bcrypt.hash(this.password, salt);
+      this.password = await bcrypt.hash(this.password, 10);
     }
   }
 
-  async comparePassword(attempt: string): Promise<boolean> {
-    if (!this.password) return false;
-    return await bcrypt.compare(attempt, this.password);
+  async comparePassword(candidatePassword: string): Promise<boolean> {
+    return bcrypt.compare(candidatePassword, this.password);
   }
 
-  toJSON() {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...rest } = this;
-    return rest;
+  toJSON(): SafeUserData {
+    return {
+      id: this.id,
+      email: this.email,
+      fullName: this.fullName,
+      username: this.username,
+      bio: this.bio,
+      avatarUrl: this.avatarUrl,
+      role: this.role,
+      isVerified: this.isVerified,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+      refreshTokens: this.refreshTokens,
+    };
+  }
+
+  toSafeUser(): SafeUserData {
+    const { password, ...safeUser } = this;
+    return safeUser;
   }
 }
-

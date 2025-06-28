@@ -4,55 +4,70 @@ import { RefreshToken } from '../entities/RefreshToken.js';
 import jwt from 'jsonwebtoken';
 import { env } from '../config/constants.js';
 import { randomBytes } from 'crypto';
+import { SignOptions } from 'jsonwebtoken';
+
+import { ApiError } from '../utils/errorHandler.js';
 
 export default class AuthService {
   private userRepository = AppDataSource.getRepository(User);
   private refreshTokenRepository = AppDataSource.getRepository(RefreshToken);
 
   async register(userData: { email: string; password: string; fullName: string }, ipAddress: string) {
-    const existingUser = await this.userRepository.findOne({ where: { email: userData.email } });
-    if (existingUser) {
-      throw new Error('Email already in use');
+    try {
+      const existingUser = await this.userRepository.findOne({ where: { email: userData.email } });
+      if (existingUser) {
+        throw new ApiError('Email already in use', 400);
+      }
+
+      const user = new User();
+      user.email = userData.email;
+      user.password = userData.password;
+      user.fullName = userData.fullName;
+
+      await this.userRepository.save(user);
+
+      const accessToken = this.generateAccessToken(user);
+      const refreshToken = await this.createRefreshToken(user, ipAddress);
+
+      const { password, ...userWithoutPassword } = user;
+      return { user: userWithoutPassword, accessToken, refreshToken: refreshToken.token };
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message.includes('duplicate key')) {
+        throw new ApiError('Email already in use', 400);
+      }
+      throw new ApiError('Internal server error', 500);
     }
-
-    const user = new User();
-    user.email = userData.email;
-    user.password = userData.password;
-    user.fullName = userData.fullName;
-
-    await this.userRepository.save(user);
-
-    const accessToken = this.generateAccessToken(user);
-    const refreshToken = await this.createRefreshToken(user, ipAddress);
-
-    const { password, ...userWithoutPassword } = user;
-    return { user: userWithoutPassword, accessToken, refreshToken: refreshToken.token };
   }
 
   async login(email: string, password: string, ipAddress: string) {
-    const user = await this.userRepository.findOne({ where: { email } });
-    if (!user) {
-      throw new Error('Invalid credentials');
+    try {
+      const user = await this.userRepository.findOne({ where: { email } });
+      if (!user) {
+        throw new ApiError('Invalid credentials', 401);
+      }
+
+      const isPasswordValid = await user.comparePassword(password);
+      if (!isPasswordValid) {
+        throw new ApiError('Invalid credentials', 401);
+      }
+
+      const accessToken = this.generateAccessToken(user);
+      const refreshToken = await this.createRefreshToken(user, ipAddress);
+
+      const { password: _, ...userWithoutPassword } = user;
+      return { user: userWithoutPassword, accessToken, refreshToken: refreshToken.token };
+    } catch (error: unknown) {
+      throw new ApiError('Internal server error', 500);
     }
-
-    const isPasswordValid = await user.comparePassword(password);
-    if (!isPasswordValid) {
-      throw new Error('Invalid credentials');
-    }
-
-    const accessToken = this.generateAccessToken(user);
-    const refreshToken = await this.createRefreshToken(user, ipAddress);
-
-    const { password: _, ...userWithoutPassword } = user;
-    return { user: userWithoutPassword, accessToken, refreshToken: refreshToken.token };
   }
 
   private generateAccessToken(user: User): string {
-    return jwt.sign(
-      { userId: user.id },
-      env.JWT_SECRET,
-      { expiresIn: env.JWT_ACCESS_EXPIRES_IN }
-    );
+    const payload = { userId: user.id };
+    const options: SignOptions = { 
+      expiresIn: parseInt(env.JWT_ACCESS_EXPIRES_IN),
+      algorithm: 'HS256'
+    };
+    return jwt.sign(payload, env.JWT_SECRET, options);
   }
 
   private async createRefreshToken(user: User, ipAddress: string): Promise<RefreshToken> {
