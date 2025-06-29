@@ -7,7 +7,7 @@ import {
   DeleteDateColumn,
   OneToMany,
 } from 'typeorm';
-import { RefreshToken } from './RefreshToken.js';
+
 import { ApiError } from '../utils/errorHandler.js';
 import { createRequire } from 'module';
 
@@ -46,8 +46,8 @@ export class User {
   @DeleteDateColumn({ type: 'timestamp', nullable: true })
   deletedAt?: Date;
 
-  @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user, { cascade: true, onDelete: 'CASCADE' })
-  refreshTokens!: RefreshToken[];
+  @OneToMany('RefreshToken', (refreshToken) => refreshToken.user, { cascade: true, onDelete: 'CASCADE' })
+  refreshTokens!: any[];
 
   async hashPassword(): Promise<void> {
     this.password = await bcrypt.hash(this.password, 10);
