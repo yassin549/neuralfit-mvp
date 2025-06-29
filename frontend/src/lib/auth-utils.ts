@@ -1,6 +1,7 @@
 import { getServerSession } from 'next-auth';
 import { authOptions } from './auth';
 import { prisma } from './db';
+import type { JournalEntry, Goal, MoodEntry } from '@prisma/client';
 
 export async function getCurrentUser() {
   const session = await getServerSession(authOptions);
@@ -143,17 +144,17 @@ export async function getRecentActivity(userId: string, limit = 5) {
 
   // Combine and sort all activities by date
   const activities = [
-    ...journalEntries.map((entry) => ({
+    ...journalEntries.map((entry: JournalEntry) => ({
       ...entry,
       type: 'journal' as const,
       date: entry.createdAt,
     })),
-    ...goals.map((goal) => ({
+    ...goals.map((goal: Goal) => ({
       ...goal,
       type: 'goal' as const,
       date: goal.updatedAt,
     })),
-    ...moodEntries.map((entry) => ({
+    ...moodEntries.map((entry: MoodEntry) => ({
       ...entry,
       type: 'mood' as const,
       date: entry.createdAt,

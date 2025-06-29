@@ -14,6 +14,7 @@ import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const bcrypt = require('bcryptjs');
 import type { SafeUserData } from '../types/user.js';
+import type { RefreshToken } from './RefreshToken.js';
 
 
 
@@ -46,8 +47,8 @@ export class User {
   @DeleteDateColumn({ type: 'timestamp', nullable: true })
   deletedAt?: Date;
 
-  @OneToMany('RefreshToken', (refreshToken) => refreshToken.user, { cascade: true, onDelete: 'CASCADE' })
-  refreshTokens!: any[];
+  @OneToMany('RefreshToken', (refreshToken: RefreshToken) => refreshToken.user, { cascade: true, onDelete: 'CASCADE' })
+  refreshTokens!: RefreshToken[];
 
   async hashPassword(): Promise<void> {
     this.password = await bcrypt.hash(this.password, 10);
