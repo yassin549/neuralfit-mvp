@@ -1,0 +1,15 @@
+node_modules/
+.env
+.env.*
+.git
+.gitignore
+.gitattributes
+.vscode/
+*.log
+*.swp
+*.swo
+.DS_Store
+coverage/
+*.tsbuildinfo
+frontend/node_modules/
+backend/node_modules/

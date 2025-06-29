@@ -1,9 +1,7 @@
-'use client';
-
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
-import ChatInterface, { ChatInterfaceHandle } from '@/components/chat/ChatInterface';
+import { DynamicChatInterface } from '@/utils/dynamic';
 import { Message as MessageType } from '@/types/chat';
 
 export default function ChatPage() {
@@ -11,7 +9,6 @@ export default function ChatPage() {
   const router = useRouter();
   const [messages, setMessages] = useState<MessageType[]>([]);
   const [isTyping, setIsTyping] = useState(false);
-  const chatInterfaceRef = useRef<ChatInterfaceHandle>(null);
 
   // Check authentication status
   useEffect(() => {
@@ -151,12 +148,12 @@ export default function ChatPage() {
       </header>
       
       <main className="flex-1 overflow-hidden flex flex-col">
-        <div className="flex-1 overflow-y-auto">
-          <ChatInterface 
+        <div className="container py-8">
+          <DynamicChatInterface
             messages={messages}
             onSendMessage={handleSendMessage}
             isTyping={isTyping}
-            ref={chatInterfaceRef}
+            onTypingChange={setIsTyping}
           />
         </div>
       </main>

@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { AppDataSource } from '../config/database.js';
-import { User, SafeUserData } from '../entities/User.js';
-import { AuthenticatedRequest } from '../middleware/auth.middleware.js';
+import { User } from '../entities/User.js';
+import type { SafeUserData } from '../types/user.js';
 import { ApiError } from '../utils/errorHandler.js';
 import { HttpStatus } from '../utils/httpStatus.js';
 
@@ -55,14 +55,13 @@ export const updateUserProfile = async (
 ): Promise<void> => {
   try {
     const { fullName, email } = req.body;
-    const authReq = req as AuthenticatedRequest;
 
-    if (!fullName && !email) {
+        if (!fullName && !email) {
       throw new ApiError('No fields to update', HttpStatus.BAD_REQUEST);
     }
 
     const user = await userRepository.findOne({
-      where: { id: authReq.user?.id },
+      where: { id: req.user?.id },
       select: ['id', 'email', 'fullName'],
     });
 
@@ -74,7 +73,7 @@ export const updateUserProfile = async (
     if (fullName) user.fullName = fullName;
 
     await userRepository.save(user);
-    res.json({ message: 'Profile updated successfully', user: user.toSafeUser() });
+        res.json({ message: 'Profile updated successfully', user: user.toSafeUser() });
   } catch (error) {
     console.error('Update profile error:', error);
     throw new ApiError('Failed to update profile', HttpStatus.INTERNAL_SERVER_ERROR, error);
@@ -89,9 +88,10 @@ export const getPublicUserProfile = async (
 ): Promise<void> => {
   try {
     const { username } = req.params;
-    const user = await userRepository.findOne({
-      where: { username },
-      select: ['id', 'username', 'fullName', 'createdAt'],
+        const user = await userRepository.findOne({
+      where: { email: username },
+      select: ['id', 'email', 'fullName', 'createdAt'],
+      relations: ['refreshTokens'], // Include refresh tokens relation if needed
     });
 
     if (!user) {
@@ -112,9 +112,8 @@ export const deleteUser = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const authReq = req as AuthenticatedRequest;
     const user = await userRepository.findOne({
-      where: { id: authReq.user?.id },
+      where: { id: req.user?.id },
       select: ['id'],
     });
 

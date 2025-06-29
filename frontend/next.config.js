@@ -14,17 +14,11 @@ const nextConfig = {
   
   // Enable experimental features
   experimental: {
-    optimizeCss: false,
+    optimizeCss: true,
     scrollRestoration: true,
   },
   
-
-  compress: true,
-  
-  // Disable source maps in development to reduce memory usage
-  productionBrowserSourceMaps: false,
-  
-  // Configure webpack to handle chunk loading
+  // Configure webpack to handle CSS properly
   webpack: (config, { isServer, dev }) => {
     // Only configure client-side chunks
     if (!isServer) {
@@ -35,17 +29,89 @@ const nextConfig = {
       };
     }
     
-    // Handle font-awesome imports
+    // Handle font imports
     config.module.rules.push({
       test: /\.(woff|woff2|eot|ttf|otf)$/i,
       type: 'asset/resource',
     });
-    
+
+    // Add CSS and SCSS support
+    config.module.rules.push({
+      test: /\.(css|scss)$/i,
+      oneOf: [
+        // CSS modules
+        {
+          test: /\.(module\.css)$/,
+          use: [
+            'style-loader',
+            {
+              loader: 'css-loader',
+              options: {
+                modules: true,
+              },
+            },
+            {
+              loader: 'postcss-loader',
+              options: {
+                postcssOptions: {
+                  plugins: {
+                    'postcss-import': {},
+                    '@tailwindcss/postcss': {
+                      config: './tailwind.config.ts'
+                    },
+                    'autoprefixer': {},
+                  },
+                },
+              },
+            },
+          ],
+        },
+        // Regular CSS
+        {
+          test: /\.(css)$/,
+          use: [
+            'style-loader',
+            'css-loader',
+            {
+              loader: 'postcss-loader',
+              options: {
+                postcssOptions: {
+                  plugins: {
+                    'postcss-import': {},
+                    '@tailwindcss/postcss': {
+                      config: './tailwind.config.ts'
+                    },
+                    'autoprefixer': {},
+                  },
+                },
+              },
+            },
+          ],
+        },
+      ],
+    });
+
     return config;
   },
   
-  // Enable standalone output for better production builds
-  // output: 'standalone',
+  // Enable experimental features
+  experimental: {
+    optimizeCss: true,
+    scrollRestoration: true,
+  },
+  
+  compress: true,
+  
+  // Disable source maps in production
+  productionBrowserSourceMaps: false,
+  
+  // Disable static optimization for design system page
+  rewrites: async () => [
+    {
+      source: '/app/design-system/:path*',
+      destination: '/404',
+    },
+  ],
 };
 
 module.exports = nextConfig;

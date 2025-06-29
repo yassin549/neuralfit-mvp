@@ -1,7 +1,12 @@
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Icons } from "@/components/icons"
-import Link from "next/link"
+import dynamic from 'next/dynamic';
+import Link from "next/link";
+
+const DynamicButton = dynamic(() => import("@/components/ui/button").then(mod => mod.Button), { ssr: false });
+const DynamicCard = dynamic(() => import("@/components/ui/card").then(mod => mod.Card), { ssr: false });
+const DynamicCardContent = dynamic(() => import("@/components/ui/card").then(mod => mod.CardContent), { ssr: false });
+const DynamicCardHeader = dynamic(() => import("@/components/ui/card").then(mod => mod.CardHeader), { ssr: false });
+const DynamicCardTitle = dynamic(() => import("@/components/ui/card").then(mod => mod.CardTitle), { ssr: false });
+const DynamicIcons = dynamic(() => import("@/components/icons").then(mod => mod.Icons), { ssr: false });
 
 export default function AboutPage() {
   return (
@@ -17,11 +22,11 @@ export default function AboutPage() {
 
       <section className="mb-16">
         <div className="mx-auto max-w-4xl">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl">Our Mission</CardTitle>
-            </CardHeader>
-            <CardContent>
+          <DynamicCard>
+            <DynamicCardHeader>
+              <DynamicCardTitle className="text-2xl">Our Mission</DynamicCardTitle>
+            </DynamicCardHeader>
+            <DynamicCardContent>
               <div className="space-y-4 text-muted-foreground">
                 <p>
                   At NeuralFit, we believe that mental health support should be accessible to everyone, 
@@ -34,8 +39,8 @@ export default function AboutPage() {
                   feelings.
                 </p>
               </div>
-            </CardContent>
-          </Card>
+            </DynamicCardContent>
+          </DynamicCard>
         </div>
       </section>
 
@@ -46,7 +51,7 @@ export default function AboutPage() {
             {
               title: "Empathy First",
               description: "We prioritize understanding and compassion in every interaction.",
-              icon: <Icons.heart className="h-8 w-8 text-primary" />
+              icon: <DynamicIcons.heart className="h-8 w-8 text-primary" />
             },
             {
               title: "Privacy & Security",

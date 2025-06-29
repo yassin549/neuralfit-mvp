@@ -97,7 +97,8 @@ export class ConversationService {
     const prompt = this.formatPrompt(conversation.messages);
 
     // Define the AI server endpoint
-    const AI_SERVER_URL = 'http://localhost:8008/generate';
+    // Use environment variable for AI server URL, fallback to localhost in development
+const AI_SERVER_URL = process.env.AI_SERVER_URL || 'http://localhost:8008/generate';
 
     try {
       // Call the Python AI server

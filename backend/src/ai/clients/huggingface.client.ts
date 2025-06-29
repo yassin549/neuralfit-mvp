@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { MODEL_CONFIG } from '../models/model.config.js';
-import { env } from '../../../config/constants';
+import { env } from '../../config/constants.js';
 
 export class HuggingFaceClient {
   private static instance: HuggingFaceClient;

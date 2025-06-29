@@ -1,60 +1,68 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import { env } from '../config/constants.js';
-import { AppDataSource } from '../config/database.js';
-import { User, SafeUserData } from '../entities/User.js';
 import { ApiError } from '../utils/errorHandler.js';
-import { HttpStatus } from '../utils/httpStatus.js';
+import { jwtService } from '../services/jwt.service.js';
+import { User } from '../entities/User.js';
+import type { SafeUserData } from '../types/user.js';
+import { AppDataSource } from '../config/database.js';
 
-const userRepository = AppDataSource.getRepository(User);
 
-// Define a custom request type that includes the user property
-export interface AuthenticatedRequest extends Request {
-  user?: SafeUserData;
-}
 
-export const auth = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
+export const auth = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const token = req.cookies?.accessToken || req.header('Authorization')?.replace('Bearer ', '');
+    const accessToken = req.cookies?.accessToken;
 
-    if (!token) {
-      throw new ApiError('No token, authorization denied', HttpStatus.UNAUTHORIZED);
+    if (!accessToken) {
+      throw new ApiError('No access token provided', 401);
     }
 
-    const decoded = jwt.verify(token, env.JWT_SECRET) as { userId: string };
-    const user = await userRepository.findOne({ where: { id: decoded.userId } });
+    const decoded = await jwtService.verifyAccessToken(accessToken);
+    const userId = decoded.sub;
+
+    const user = await AppDataSource.manager.findOne(User, {
+      where: { id: userId },
+      select: ['id', 'email', 'fullName', 'role', 'isVerified', 'createdAt', 'updatedAt'],
+    });
 
     if (!user) {
-      throw new ApiError('User not found for token', HttpStatus.UNAUTHORIZED);
+      throw new ApiError('User not found', 401);
     }
 
-    (req as AuthenticatedRequest).user = user.toSafeUser();
+    const safeUser: SafeUserData = {
+      id: user.id,
+      email: user.email,
+      fullName: user.fullName,
+      role: user.role,
+      isVerified: user.isVerified,
+      createdAt: user.createdAt.toISOString(),
+      updatedAt: user.updatedAt.toISOString(),
+    };
+
+    req.user = safeUser;
     next();
-  } catch (error) {
-    console.error('Auth error:', error);
-    throw new ApiError('Invalid token', HttpStatus.UNAUTHORIZED);
+  } catch (error: any) {
+    if (error.name === 'TokenExpiredError') {
+      throw new ApiError('Access token expired', 401);
+    }
+    throw error;
   }
 };
 
 export const authorize = (roles: string[]) => {
-  return async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
-    const authReq = req as AuthenticatedRequest;
-    if (!authReq.user) {
-      throw new ApiError('Not authenticated', HttpStatus.UNAUTHORIZED);
-    }
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const user = req.user as SafeUserData;
 
-    if (!roles.includes(authReq.user.role)) {
-      throw new ApiError('Unauthorized', HttpStatus.FORBIDDEN);
-    }
+      if (!user) {
+        throw new ApiError('User not authenticated', 401);
+      }
 
-    next();
+      if (!roles.includes(user.role)) {
+        throw new ApiError('Unauthorized', 403);
+      }
+
+      next();
+    } catch (error: any) {
+      throw error;
+    }
   };
 };

@@ -19,6 +19,6 @@ export const MODEL_CONFIG: ModelConfig = {
   non-judgmental, and evidence-based responses to help users with their mental well-being. Be empathetic, 
   validate their feelings, and provide practical guidance when appropriate. Always maintain professional 
   boundaries and know when to recommend seeking help from a licensed professional.`,
-  device: env.AI_DEVICE === 'cuda' ? 'cuda' : 'cpu',
+  device: env.AI_DEVICE?.toLowerCase() === 'cuda' ? 'cuda' : 'cpu',
   quantized: false as const
 } as const;

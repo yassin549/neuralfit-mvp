@@ -1,5 +1,5 @@
 import { Router, Request, Response as ExpressResponse, NextFunction } from 'express';
-import { AuthenticatedRequest } from '../middleware/auth.middleware.js';
+
 import * as userController from '../controllers/user.controller.js';
 import { auth, authorize } from '../middleware/auth.middleware.js';
 import { handleError } from '../utils/errorHandler.js';
@@ -22,7 +22,7 @@ router.use(auth);
 router.get('/', (req: Request, res: ExpressResponse, next: NextFunction) => {
   authorize(['admin'])(req, res, (error) => {
     if (error) return handleError(error, res, next);
-    userController.getAllUsers(req as AuthenticatedRequest, res, next).catch(error => handleError(error, res, next));
+    userController.getAllUsers(req, res, next).catch(error => handleError(error, res, next));
   });
 });
 
@@ -30,21 +30,21 @@ router.get('/', (req: Request, res: ExpressResponse, next: NextFunction) => {
 // @desc    Get user by ID
 // @access  Private
 router.get('/:id', (req: Request, res: ExpressResponse, next: NextFunction) => {
-  userController.getUserById(req as AuthenticatedRequest, res, next).catch(error => handleError(error, res, next));
+  userController.getUserById(req, res, next).catch(error => handleError(error, res, next));
 });
 
 // @route   PUT /api/users/profile
 // @desc    Update current user profile
 // @access  Private
 router.put('/profile', (req: Request, res: ExpressResponse, next: NextFunction) => {
-  userController.updateUserProfile(req as AuthenticatedRequest, res, next).catch(error => handleError(error, res, next));
+  userController.updateUserProfile(req, res, next).catch(error => handleError(error, res, next));
 });
 
 // @route   DELETE /api/users/profile
 // @desc    Delete current user
 // @access  Private
 router.delete('/profile', (req: Request, res: ExpressResponse, next: NextFunction) => {
-  userController.deleteUser(req as AuthenticatedRequest, res, next).catch(error => handleError(error, res, next));
+  userController.deleteUser(req, res, next).catch(error => handleError(error, res, next));
 });
 
 export default router;

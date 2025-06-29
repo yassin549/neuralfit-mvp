@@ -2,7 +2,7 @@ const { exec } = require('child_process');
 const { promisify } = require('util');
 const path = require('path');
 const { MODEL_CONFIG } = require('../models/model.config');
-const modelTypes = require('../types/model.types');
+import { ModelResponse } from '../../types/model.js';
 
 const execAsync = promisify(exec);
 
@@ -76,7 +76,7 @@ class ModelManager {
   public async generateResponse(
     prompt: string,
     options: Partial<Omit<typeof MODEL_CONFIG, 'modelName' | 'modelPath' | 'modelUrl'>> = {}
-  ): Promise<modelTypes.ModelResponse> {
+  ): Promise<ModelResponse> {
     if (!this.isInitialized) {
       await this.initialize();
     }
@@ -109,7 +109,7 @@ class ModelManager {
       const timeTaken = (endTime - startTime) / 1000; // Convert to seconds
 
       return {
-        text: stdout.trim(),
+        response: stdout.trim(),
         tokensUsed: 0,
         timeTaken,
         isSafe: true,
@@ -134,7 +134,6 @@ class ModelManager {
 const modelManager = ModelManager.getInstance();
 
 module.exports = {
-  ...modelTypes,
   ModelManager,
   modelManager,
 };

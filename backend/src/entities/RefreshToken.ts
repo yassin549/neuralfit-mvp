@@ -32,7 +32,10 @@ export class RefreshToken {
   isRevoked = false;
 
   @Column('varchar')
-  createdByIp!: string;
+  ipAddress!: string;
+
+  @Column('text')
+  userAgent!: string;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt!: Date;
@@ -54,4 +57,3 @@ export class RefreshToken {
     return !this.revokedAt && !this.isExpired();
   }
 }
-

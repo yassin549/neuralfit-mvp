@@ -1,0 +1,25 @@
+{
+  "name": "neuralfit-mvp",
+  "version": "1.0.0",
+  "description": "NeuralFit MVP Application",
+  "scripts": {
+    "start": "node backend/dist/server.js",
+    "build": "npm run build:frontend && npm run build:backend",
+    "build:frontend": "cd frontend && npm run build",
+    "build:backend": "cd backend && npm run build",
+    "dev": "concurrently \"cd frontend && npm run dev\" \"cd backend && npm run dev\"",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.11",
+    "autoprefixer": "^10.4.21",
+    "concurrently": "^8.2.0",
+    "css-loader": "^7.1.2",
+    "nodemon": "^3.0.1",
+    "postcss-import": "^16.1.1",
+    "postcss-loader": "^8.1.1",
+    "postcss-nesting": "^13.0.2",
+    "style-loader": "^4.0.0",
+    "tailwindcss": "^4.1.11"
+  }
+}

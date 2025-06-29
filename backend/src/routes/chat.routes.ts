@@ -1,23 +1,18 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { AuthenticatedRequest } from '../middleware/auth.middleware.js';
-import * as chatController from '../controllers/chat.controller.js';
 import { auth } from '../middleware/auth.middleware.js';
+import chatController from '../controllers/chat.controller.js';
 
 const router = Router();
 
 // Public routes
-router.get('/status', (req: Request, res: Response) => chatController.status(req, res));
-
-// Protected routes (require authentication)
-router.use(auth);
+router.get('/status', chatController.status);
 
 // Conversation management
-router.post('/conversations', (req: AuthenticatedRequest, res: Response) => chatController.createConversation(req, res));
-router.get('/conversations', (req: AuthenticatedRequest, res: Response) => chatController.listConversations(req, res));
-router.get('/conversations/:conversationId', (req: AuthenticatedRequest, res: Response) => chatController.getConversation(req, res));
+router.post('/conversations', auth, chatController.createConversation);
+router.get('/conversations', auth, chatController.listConversations);
+router.get('/conversations/:conversationId', auth, chatController.getConversation);
 
 // Chat interaction
-router.post('/chat', (req: AuthenticatedRequest, res: Response) => chatController.chat(req, res));
+router.post('/chat', auth, chatController.chat);
 
 export default router;
-

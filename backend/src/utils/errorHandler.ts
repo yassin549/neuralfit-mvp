@@ -1,17 +1,13 @@
-import { HttpException } from '@nestjs/common';
 import { Response, NextFunction } from 'express';
 
-export class ApiError extends HttpException {
+export class ApiError extends Error {
   constructor(
     public message: string,
     public status: number = 500,
     public details?: any
   ) {
-    super({
-      message,
-      details,
-      timestamp: new Date().toISOString(),
-    }, status);
+    super(message);
+    this.name = 'ApiError';
   }
 
   public getResponse() {
@@ -27,6 +23,11 @@ export const handleError = (error: Error | ApiError, res: Response, next: NextFu
   if (error instanceof ApiError) {
     return res.status(error.status).json(error.getResponse());
   }
-  
-  return next(error);
+  if (error instanceof Error) {
+    return res.status(500).json({
+      message: 'Internal Server Error',
+      timestamp: new Date().toISOString()
+    });
+  }
+  next(error);
 };

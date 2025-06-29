@@ -4,27 +4,18 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
-  BeforeInsert,
-  BeforeUpdate,
+  DeleteDateColumn,
   OneToMany,
 } from 'typeorm';
-import * as bcrypt from 'bcryptjs';
 import { RefreshToken } from './RefreshToken.js';
+import { ApiError } from '../utils/errorHandler.js';
+import { createRequire } from 'module';
 
-// Type for user data without sensitive fields
-export interface SafeUserData {
-  id: string;
-  email: string;
-  fullName: string;
-  username?: string;
-  bio?: string;
-  avatarUrl?: string;
-  role: string;
-  isVerified: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-  refreshTokens: RefreshToken[];
-}
+const require = createRequire(import.meta.url);
+const bcrypt = require('bcryptjs');
+import type { SafeUserData } from '../types/user.js';
+
+
 
 @Entity('users')
 export class User {
@@ -34,26 +25,17 @@ export class User {
   @Column('varchar', { unique: true })
   email!: string;
 
-  @Column('text')
+  @Column('varchar')
   password!: string;
 
   @Column('varchar')
   fullName!: string;
 
-  @Column('varchar', { unique: true, nullable: true })
-  username?: string;
-
-  @Column('text', { nullable: true })
-  bio?: string;
-
-  @Column('varchar', { nullable: true })
-  avatarUrl?: string;
-
   @Column('varchar', { default: 'user' })
-  role!: string;
+  role: 'user' | 'admin' | 'trainer' = 'user';
 
   @Column('boolean', { default: false })
-  isVerified!: boolean;
+  isVerified = false;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt!: Date;
@@ -61,42 +43,36 @@ export class User {
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt!: Date;
 
-  @OneToMany(() => RefreshToken, (refreshToken: RefreshToken) => refreshToken.user, {
-    cascade: true,
-    orphanedRowAction: 'delete'
-  })
+  @DeleteDateColumn({ type: 'timestamp', nullable: true })
+  deletedAt?: Date;
+
+  @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user, { cascade: true, onDelete: 'CASCADE' })
   refreshTokens!: RefreshToken[];
 
-  @BeforeInsert()
-  @BeforeUpdate()
   async hashPassword(): Promise<void> {
-    if (this.password) {
-      this.password = await bcrypt.hash(this.password, 10);
+    this.password = await bcrypt.hash(this.password, 10);
+  }
+
+  async validatePassword(password: string): Promise<boolean> {
+    if (!this.password) {
+      throw new ApiError('User has no password', 400);
     }
+    return bcrypt.compare(password, this.password);
   }
 
-  async comparePassword(candidatePassword: string): Promise<boolean> {
-    return bcrypt.compare(candidatePassword, this.password);
-  }
-
-  toJSON(): SafeUserData {
+  toSafeUser(): SafeUserData {
     return {
       id: this.id,
       email: this.email,
       fullName: this.fullName,
-      username: this.username,
-      bio: this.bio,
-      avatarUrl: this.avatarUrl,
       role: this.role,
       isVerified: this.isVerified,
-      createdAt: this.createdAt,
-      updatedAt: this.updatedAt,
-      refreshTokens: this.refreshTokens,
+      createdAt: this.createdAt.toISOString(),
+      updatedAt: this.updatedAt.toISOString(),
     };
   }
 
-  toSafeUser(): SafeUserData {
-    const { password, ...safeUser } = this;
-    return safeUser;
+  toJSON(): SafeUserData {
+    return this.toSafeUser();
   }
 }

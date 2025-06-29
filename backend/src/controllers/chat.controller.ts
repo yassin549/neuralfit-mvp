@@ -1,14 +1,19 @@
 import { Request, Response } from 'express';
-import { AuthenticatedRequest } from '../middleware/auth.middleware.js';
+
 import aiService from '../ai/ai.service.js';
 
-export const chat = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+const chat = async (req: Request, res: Response): Promise<void> => {
     try {
         const { message, conversationId } = req.body;
-        const userId = req.user?.id ?? 'anonymous';
+        const userId = req.user?.id;
 
         if (!message) {
             res.status(400).json({ error: 'Message is required' });
+            return;
+        }
+
+        if (!userId) {
+            res.status(401).json({ error: 'User not authenticated' });
             return;
         }
 
@@ -18,45 +23,42 @@ export const chat = async (req: AuthenticatedRequest, res: Response): Promise<vo
             conversationId: result.conversationId,
             response: result.response,
             messages: result.messages,
-            timestamp: new Date().toISOString(),
         });
     } catch (error) {
-        console.error('❌ Chat error:', error);
-        res.status(500).json({
-            error: 'An error occurred while processing your request',
-            details: error instanceof Error ? error.message : 'Unknown error',
-        });
+        console.error('Chat error:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 };
 
-export const createConversation = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+const createConversation = async (req: Request, res: Response): Promise<void> => {
     try {
-        const userId = req.user?.id ?? 'anonymous';
         const { title } = req.body;
+        const userId = req.user?.id;
+
+        if (!userId) {
+            res.status(401).json({ error: 'User not authenticated' });
+            return;
+        }
 
         const conversation = await aiService.createConversation(userId, title);
-
-        res.status(201).json({
-            conversationId: conversation.id,
-            title: conversation.title,
-            createdAt: conversation.createdAt.toISOString(),
-        });
+        res.status(201).json(conversation);
     } catch (error) {
-        console.error('❌ Create conversation error:', error);
-        res.status(500).json({
-            error: 'Failed to create conversation',
-            details: error instanceof Error ? error.message : 'Unknown error',
-        });
+        console.error('Create conversation error:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 };
 
-export const getConversation = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+const getConversation = async (req: Request, res: Response): Promise<void> => {
     try {
         const { conversationId } = req.params;
-        const userId = req.user?.id ?? 'anonymous';
+        const userId = req.user?.id;
+
+        if (!userId) {
+            res.status(401).json({ error: 'User not authenticated' });
+            return;
+        }
 
         const conversation = await aiService.getConversation(conversationId);
-
         if (!conversation) {
             res.status(404).json({ error: 'Conversation not found' });
             return;
@@ -67,65 +69,56 @@ export const getConversation = async (req: AuthenticatedRequest, res: Response):
             return;
         }
 
-        res.json({
-            id: conversation.id,
-            title: conversation.title,
-            messages: conversation.messages,
-            createdAt: conversation.createdAt.toISOString(),
-            updatedAt: conversation.updatedAt.toISOString(),
-        });
+        res.json(conversation);
     } catch (error) {
-        console.error('❌ Get conversation error:', error);
-        res.status(500).json({
-            error: 'Failed to retrieve conversation',
-            details: error instanceof Error ? error.message : 'Unknown error',
-        });
+        console.error('Get conversation error:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 };
 
-export const listConversations = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+const listConversations = async (req: Request, res: Response): Promise<void> => {
     try {
-        const userId = req.user?.id ?? 'anonymous';
+        const userId = req.user?.id;
+
+        if (!userId) {
+            res.status(401).json({ error: 'User not authenticated' });
+            return;
+        }
 
         const conversations = await aiService.getUserConversations(userId);
-
         res.json(
             conversations.map((conv) => ({
                 id: conv.id,
                 title: conv.title,
-                preview:
-                    conv.messages.length > 0
-                        ? conv.messages[conv.messages.length - 1].content.substring(0, 100)
-                        : 'No messages yet',
+                createdAt: conv.createdAt.toISOString(),
                 updatedAt: conv.updatedAt.toISOString(),
+                messageCount: conv.messages.length
             }))
         );
     } catch (error) {
-        console.error('❌ List conversations error:', error);
-        res.status(500).json({
-            error: 'Failed to retrieve conversations',
-            details: error instanceof Error ? error.message : 'Unknown error',
-        });
+        console.error('List conversations error:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 };
 
-export const status = async (req: Request, res: Response): Promise<void> => {
+const status = async (req: Request, res: Response): Promise<void> => {
     try {
         const isReady = aiService.isReady();
-
         res.json({
             status: isReady ? 'operational' : 'initializing',
-            model: 'MentaLLaMA-chat-7B',
             ready: isReady,
-            timestamp: new Date().toISOString(),
+            timestamp: new Date().toISOString()
         });
     } catch (error) {
-        console.error('❌ Status check error:', error);
-        res.status(500).json({
-            status: 'error',
-            error: 'Service unavailable',
-            details: error instanceof Error ? error.message : 'Unknown error',
-        });
+        console.error('Status check error:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 };
 
+export default {
+    chat,
+    createConversation,
+    getConversation,
+    listConversations,
+    status
+};
