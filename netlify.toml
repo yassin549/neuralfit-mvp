@@ -1,6 +1,10 @@
 [build]
-  command = "npm run build"
-  publish = "dist"
+  # Set the base directory to the frontend folder
+  base = "frontend"
+  # Command to build the frontend
+  command = "npm install && npm run build"
+  # Publish directory for Next.js (SSR)
+  publish = ".next"
 
 [build.environment]
   NODE_ENV = "production"
