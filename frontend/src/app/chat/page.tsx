@@ -11,6 +11,7 @@ export default function ChatPage() {
   const router = useRouter();
   const [messages, setMessages] = useState<MessageType[]>([]);
   const [isTyping, setIsTyping] = useState(false);
+  const chatInterfaceRef = useRef<any>(null);
 
   // Check authentication status
   useEffect(() => {
