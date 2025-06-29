@@ -97,7 +97,7 @@ const main = async () => {
   } catch (error) {
     // Use logger for fatal errors
     const logger = pino();
-    logger.fatal('Failed to initialize application:', error);
+    logger.fatal({ err: error }, 'Failed to initialize application');
     process.exit(1);
   }
 };
