@@ -144,17 +144,17 @@ export async function getRecentActivity(userId: string, limit = 5) {
 
   // Combine and sort all activities by date
   const activities = [
-    ...journalEntries.map((entry: JournalEntry) => ({
+    ...journalEntries.map((entry) => ({
       ...entry,
       type: 'journal' as const,
       date: entry.createdAt,
     })),
-    ...goals.map((goal: Goal) => ({
+    ...goals.map((goal) => ({
       ...goal,
       type: 'goal' as const,
       date: goal.updatedAt,
     })),
-    ...moodEntries.map((entry: MoodEntry) => ({
+    ...moodEntries.map((entry) => ({
       ...entry,
       type: 'mood' as const,
       date: entry.createdAt,
