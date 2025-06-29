@@ -4,7 +4,7 @@ import * as userController from '../controllers/user.controller.js';
 import { auth, authorize } from '../middleware/auth.middleware.js';
 import { handleError } from '../utils/errorHandler.js';
 
-const router = Router();
+const router: Router = Router();
 
 // @route   GET /api/users/profile/:username
 // @desc    Get public user profile

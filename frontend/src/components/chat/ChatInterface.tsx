@@ -24,12 +24,14 @@ interface ChatInterfaceProps {
   messages: MessageType[];
   onSendMessage: (message: string) => void;
   isTyping: boolean;
+  onTypingChange: (isTyping: boolean) => void;
 }
 
 const ChatInterface = forwardRef<ChatInterfaceHandle, ChatInterfaceProps>(({ 
   messages, 
   onSendMessage, 
-  isTyping 
+  isTyping, 
+  onTypingChange 
 }, ref) => {
   const [message, setMessage] = useState('');
   const formRef = useRef<HTMLFormElement>(null);

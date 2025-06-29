@@ -2,7 +2,7 @@ import { Router, Response, Request } from 'express';
 import { authController } from '../controllers/auth.controller.js';
 import { auth } from '../middleware/auth.middleware.js';
 
-const router = Router();
+const router: Router = Router();
 
 // Public routes
 router.post('/register', authController.register.bind(authController));

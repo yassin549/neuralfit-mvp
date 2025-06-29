@@ -2,7 +2,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { auth } from '../middleware/auth.middleware.js';
 import chatController from '../controllers/chat.controller.js';
 
-const router = Router();
+const router: Router = Router();
 
 // Public routes
 router.get('/status', chatController.status);
