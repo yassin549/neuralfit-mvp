@@ -5,16 +5,16 @@ import { Message as MessageType } from '@/types/chat';
 import SendIcon from './icons/SendIcon';
 
 // Import the necessary components from the chat UI kit
-const { 
+import { 
   MainContainer, 
   ChatContainer, 
   MessageList, 
-  Message: ChatMessage, 
+  Message as ChatMessage, 
   MessageInput, 
   TypingIndicator,
   MessageSeparator,
   Avatar
-} = require('../chat-ui-kit');
+} from '../chat-ui-kit';
 
 export interface ChatInterfaceHandle {
   scrollToBottom: () => void;
@@ -27,7 +27,7 @@ interface ChatInterfaceProps {
   onTypingChange: (isTyping: boolean) => void;
 }
 
-const ChatInterface = forwardRef<ChatInterfaceHandle, ChatInterfaceProps>(({ 
+export const ChatInterface = forwardRef<ChatInterfaceHandle, ChatInterfaceProps>(({ 
   messages, 
   onSendMessage, 
   isTyping, 
