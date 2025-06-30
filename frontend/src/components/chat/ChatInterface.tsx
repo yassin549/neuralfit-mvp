@@ -5,16 +5,7 @@ import { Message as MessageType } from '@/types/chat';
 import SendIcon from './icons/SendIcon';
 
 // Import the necessary components from the chat UI kit
-import { 
-  MainContainer, 
-  ChatContainer, 
-  MessageList, 
-  Message as ChatMessage, 
-  MessageInput, 
-  TypingIndicator,
-  MessageSeparator,
-  Avatar
-} from '../chat-ui-kit';
+
 
 export interface ChatInterfaceHandle {
   scrollToBottom: () => void;
@@ -33,6 +24,11 @@ export const ChatInterface = forwardRef<ChatInterfaceHandle, ChatInterfaceProps>
   isTyping, 
   onTypingChange 
 }, ref) => {
+  const [ChatComponents, setChatComponents] = useState<any>(null);
+
+  useEffect(() => {
+    import('../chat-ui-kit').then(setChatComponents);
+  }, []);
   const [message, setMessage] = useState('');
   const formRef = useRef<HTMLFormElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -89,6 +85,21 @@ export const ChatInterface = forwardRef<ChatInterfaceHandle, ChatInterfaceProps>
     }
     return false;
   };
+
+  if (!ChatComponents) {
+    return <div>Loading chat...</div>; // Or a spinner component
+  }
+
+  const { 
+    MainContainer, 
+    ChatContainer, 
+    MessageList, 
+    Message: ChatMessage, 
+    MessageInput, 
+    TypingIndicator,
+    MessageSeparator,
+    Avatar
+  } = ChatComponents;
 
   return (
     <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900">
