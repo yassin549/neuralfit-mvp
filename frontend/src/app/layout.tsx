@@ -4,7 +4,7 @@ import { ClientBottomNav } from '@/components/client-bottom-nav';
 import { AuthProvider } from '@/components/auth-provider';
 import { AuthProvider as CustomAuthProvider } from '@/hooks/useAuth';
 import { ThemeProvider } from '@/components/theme-provider';
-import { WindowSystemProvider } from '@/components/window-system';
+import { ClientWindowSystemProvider } from '@/components/client-window-system-provider';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -88,7 +88,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
               enableSystem
               disableTransitionOnChange
             >
-              <WindowSystemProvider>
+              <ClientWindowSystemProvider>
                 <TooltipProvider delayDuration={300}>
                   <div className="flex flex-col min-h-screen">
                     <main className="flex-1 overflow-y-auto pb-16">
@@ -98,7 +98,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
                   </div>
                   <Toaster position="top-center" richColors />
                 </TooltipProvider>
-              </WindowSystemProvider>
+              </ClientWindowSystemProvider>
             </ThemeProvider>
           </CustomAuthProvider>
         </AuthProvider>
