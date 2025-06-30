@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
-import { BottomNav } from '@/components/bottom-nav-new';
+import dynamic from 'next/dynamic';
+
+const BottomNav = dynamic(() => import('@/components/bottom-nav-new').then(mod => mod.BottomNav), { ssr: false });
 import { AuthProvider } from '@/components/auth-provider';
 import { AuthProvider as CustomAuthProvider } from '@/hooks/useAuth';
 import { ThemeProvider } from '@/components/theme-provider';
