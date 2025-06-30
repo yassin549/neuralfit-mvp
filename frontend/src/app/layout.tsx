@@ -1,8 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
-import dynamic from 'next/dynamic';
-
-const BottomNav = dynamic(() => import('@/components/bottom-nav-new').then(mod => mod.BottomNav), { ssr: false });
+import { ClientBottomNav } from '@/components/client-bottom-nav';
 import { AuthProvider } from '@/components/auth-provider';
 import { AuthProvider as CustomAuthProvider } from '@/hooks/useAuth';
 import { ThemeProvider } from '@/components/theme-provider';
@@ -96,7 +94,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
                     <main className="flex-1 overflow-y-auto pb-16">
                       {children}
                     </main>
-                    <BottomNav />
+                    <ClientBottomNav />
                   </div>
                   <Toaster position="top-center" richColors />
                 </TooltipProvider>
